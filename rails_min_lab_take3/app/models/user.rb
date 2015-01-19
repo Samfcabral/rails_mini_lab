@@ -32,3 +32,5 @@ class User < ActiveRecord::Base
     user.authenticate(password_param)
   end
 end
+
+
