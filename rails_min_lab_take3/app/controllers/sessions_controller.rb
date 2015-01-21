@@ -1,23 +1,27 @@
 class SessionsController < ApplicationController
+  
   def new
   end
 
   def create
-    user_params = params.require(:user)
-    user = User.confirm(user_params[:email], user_params[:password])
+    user = User.confirm(*login_params)
     if user
       login(user)
-      redirect_to user_path(user.id)
+      redirect_to user_path(user)
     else
-      flash[:error] = "Failed To Authenticate. Please try again."	
-      redirect_to "/login"
+      redirect_to login_path
     end
   end
 
   def destroy
-    logout()
-    redirect_to "/"
+    logout
+    redirect_to login_path
   end
-    
-end
 
+  private
+
+    def login_params
+      user = params.require(:user)
+      [user[:email], user[:password]]
+    end
+end

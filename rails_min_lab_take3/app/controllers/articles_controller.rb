@@ -1,49 +1,55 @@
 class ArticlesController < ApplicationController
+  before_action :logged_in?
+  before_action :set_user_article, only: [:edit, :update, :destroy]
+
   def index
-  	@articles = Article.all
-  	render :index
+    @articles = current_user.articles
+    @articles.each {|article| article.get_keywords }
   end
 
   def new
-  	@article = Article.new
-  	render :new
-  end
-
-  def edit
-    id = params[:id]
-    @article = Article.find(id)
-    render :edit
-  end
-
-  def show
-    id = params[:id]
-    @article = Article.find(id)
-    render :show
+    @article = Article.new
   end
 
   def create
-    new_article = params.require(:article).permit(:title, :author, :content)
-    article = Article.create(new_article)
-    redirect_to "/articles/#{article.id}"
+    article = current_user.articles.new(article_params)
+    if article.save
+      redirect_to article_path(article)
+    else 
+      redirect_to new_article_path
+    end
+  end
+
+  def show
+    @article = Article.find_by({id: params[:id]})
+    @article.get_keywords
+  end
+
+  def edit
   end
 
   def update
-    article_id = params[:id]
-    article = Article.find(Article_id)
-
-    # get updated data
-    updated_attributes = params.require(:creatue).permit(:name, :description)
-    # update the article
-    article.update_attributes(updated_attributes)
-
-    #redirect to show
-    redirect_to "/articles/#{article_id}"
+    if @article.update_attributes(article_params)
+      redirect_to article_path(@article)
+    else
+      redirect_to edit_article_path(@article)
+    end
   end
 
   def destroy
-    id = params[:id]
-    article = Article.find(id)
-    article.destroy
-    redirect_to "/articles"
+    @article.destroy()
   end
+
+  private
+
+    def article_params
+      params.require(:article).permit(:title, :content)
+    end
+
+    def set_user_article
+      @article = current_user.articles.find_by({id: params[:id]})
+      unless @article
+        redirect_to articles_path
+      end
+    end
 end

@@ -6,7 +6,7 @@ class CreateArticles < ActiveRecord::Migration
       t.text :content
 
       t.timestamps null: false
-      t.references :users
+      t.references :user
     end
   end
 end

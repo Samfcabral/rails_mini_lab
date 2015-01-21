@@ -1,36 +1,38 @@
-require 'bcrypt'
-
 class User < ActiveRecord::Base
+
   has_many :articles
 
-  BCrypt::Engine.cost = 12
+  has_secure_password
 
-  attr_reader :password 
+  validates :email, 
+            uniqueness: true,
+            confirmation: true
 
-  validates_confirmation_of :password
-  validates_presence_of :password_digest
+  validates :password_confirmation,
+            :presence => true,
+            :length => { :minimum => 8},
+            # password must not be all lowercase letters
+            :format => { :without => /\A[a-z]+\z/ },
+            :if => :password_required? 
 
-  def password=(unencrypted_password)
-    if unencrypted_password.nil?
-      self.password_digest = nil
-    else 
-      @password = unencrypted_password
-      self.password_digest = BCrypt::Password.create(@password)
-    end
-  end
+  validates :email_confirmation, 
+            format: { with: /.+@.+/ },
+            presence: true,
+            if: :email_conf_required?
 
-  def authenticate(unencrypted_password)
-    if BCrypt::Password.new(password_digest) == unencrypted_password
-      self
-    else
-      false
-    end
-  end
 
   def self.confirm(email_param, password_param)
-    user = User.find_by({email: email_param})
-    user.authenticate(password_param)
+    user = find_by({email: email_param})
+    user.try(:authenticate, password_param)
+  end
+
+  ## These need tests too
+
+  def password_required?
+     self.new_record? or !self.password.nil?
+  end
+
+  def email_conf_required?
+     self.new_record? or self.email_changed?
   end
 end
-
-

@@ -1,8 +1,4 @@
 <h1>Articles#show</h1>
 <p>Find me in app/views/articles/show.html.erb</p>
 
-    <div>
-        Title: <%= @article.title %> <br>
-        Author: <%= @article.author %><br>
-        Content: <%=  @article.content %>
-    </div>
+<%= render partial: "articles/article", locals: {article: @article }%>

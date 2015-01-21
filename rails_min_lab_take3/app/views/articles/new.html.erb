@@ -2,11 +2,4 @@
 <p>Find me in app/views/articles/new.html.erb</p>
 
 
-<%= form_for @article, url: "/articles", method: "post" do |f| %>
-
-    <%= f.text_field :title, placeholder:"Title" %> <br><br>
-    <%= f.text_field :author, placeholder:"Author" %> <br><br>
-    <%= f.text_area :content, placeholder:"Content" %><br><br>
-    <%= f.submit "save article" %>
-
-<% end %>
+<%= render partial: "articles/form", locals: {article: @article }%>
